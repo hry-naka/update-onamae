@@ -14,7 +14,7 @@ update script for onamae ddns service
 ## 仕様
 
 ```
-% update-onamae [-f filename] [--daemon] [--interval time]
+% update-onamae.py [-f filename] [--daemon] [--interval time]
 ```
 - '-f filename' : 更新スクリプトのファイル名。省略すると'./.onamae-env'を使う
 - ’--daemon' : デーモン化する。省略するとデーモン化しないでexitする
