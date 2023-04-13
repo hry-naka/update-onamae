@@ -1,7 +1,7 @@
 # update-onamae
 update script for onamae ddns service
 
-## 機能(実装機能）
+## 機能(実装仕様）
 お名前ドットコムのDNS　Aレコードを更新する。
 - 更新を要求する先のDNSサーバは、指定されたドメインのNSレコードの一番最初のレコードにある'fqdn'を使う。
 - この'fqdn'にsslセッションをはって、使う人が準備したスクリプトをsendする（だけ）。
