@@ -14,11 +14,17 @@ update script for onamae ddns service
 ## 仕様
 
 ```
-% update-onamae.py [-f filename] [--daemon] [--interval time]
+usage: update-onamae.py [-h] [-f script_filename] [-i interval]
+
+update script for onamae ddns service
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f script_filename, --filename script_filename
+                        Set script filename
+  -i interval, --interval interval
+                        Interval time(0(defalut):update only once, X:update every Xs, X[mh]: update every X[mh]).
 ```
-- '-f filename' : 更新スクリプトのファイル名。省略すると'./.onamae-env'を使う
-- ’--daemon' : デーモン化する。省略するとデーモン化しないでexitする
-- ’--interval　time’　: 更新を要求する周期。省略すると３００ｓ（５分）。timeは、単位がない場合は秒で扱う。X'm'はX分、Y’ｈ’はY時間
 
 ## 使い方
 ### 一回限りの更新
@@ -27,7 +33,7 @@ update script for onamae ddns service
 ```
 ###　更新スクリプトファイルを指定して、１０分周期で更新
 ```
-% update-onamae -f ./onamae-env --daemon --interval 10m
+% update-onamae -f ./onamae-env --interval 10m
 ```
 ### スクリプトファイル
 
