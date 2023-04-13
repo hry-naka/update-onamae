@@ -3,11 +3,10 @@ update script for onamae ddns service
 
 ## 機能(実装仕様）
 お名前ドットコムのDNS　Aレコードを更新する。
-- 更新を要求する先のDNSサーバは、指定されたドメインのNSレコードの一番最初のレコードにある'fqdn'を使う。
-- この'fqdn'にsslセッションをはって、使う人が準備したスクリプトをsendする（だけ）。
-- このスクリプトには、'IPV4:xx.yy.zz.ww'で更新するIPアドレスを指定できる。'IPV4:GLOBAL-IP'と書くと、'https://ifconfig.me'
+- "ddnsclient.onamae.com:65010", にsslコネクションをはって、使う人が準備したConfigの内容をsendする。
+- このスクリプトのConfigファイルには、'IPV4:xx.yy.zz.ww'で更新するIPアドレスを指定できる。'IPV4:GLOBAL-IP'と書くと、'https://ifconfig.me'
 から取得したIPv4アドレスに置換して更新に使う。
-- 更新する前のIPv4アドレスと、更新するアドレスが同じであれば、対応する更新（’MODIP　〜　.')を抜いたスクリプトをsendする。
+- 更新する前のIPv4アドレスと、更新するアドレスが同じであれば、対応する更新（’MODIP　〜　.')を抜いたスクリプトをsendする。Skipのメッセージは出す。
 すべてのHOSTNAME：の更新がスキップされることがある（LOGIN/LOGOUTするだけ）
 - 起動オプションで、デーモン化できるようにして、更新要求を繰り返す周期も起動オプションで設定できるようにする。
 
