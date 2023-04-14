@@ -36,6 +36,7 @@ options:
 % update-onamae -f ./onamae-env --interval 10m
 ```
 ### スクリプトファイル
+パスワードが入りますので、'chmod　600'等はしておいてください。
 
 ```
 LOGIN
