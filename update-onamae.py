@@ -16,12 +16,12 @@ def get_args():
     parser.add_argument('-f', '--filename',
                         metavar='config_filename',
                         nargs=1,
-                        default='./.onamae-env',
+                        default=['./.onamae-env'],
                         help='Set config filename')
     parser.add_argument('-i', '--interval',
                         metavar='time',
                         nargs=1,
-                        default='0',
+                        default=['0'],
                         help="Interval time(0(defalut):update only once, X:update every Xs, X[mh]: update every X[mh]).")
     return parser.parse_args()
 
