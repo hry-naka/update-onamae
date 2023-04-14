@@ -3,27 +3,28 @@ update script for onamae ddns service
 
 ## 機能(実装仕様）
 お名前ドットコムのDNS　Aレコードを更新する。
-- "ddnsclient.onamae.com:65010", にsslコネクションをはって、使う人が準備したConfigの内容をsendする。
+- "ddnsclient.onamae.com:65010", にopensslコマンドでConfigの内容をsendする。
 - このスクリプトのConfigファイルには、'IPV4:xx.yy.zz.ww'で更新するIPアドレスを指定できる。'IPV4:GLOBAL-IP'と書くと、'https://ifconfig.me'
 から取得したIPv4アドレスに置換して更新に使う。
-- 更新する前のIPv4アドレスと、更新するアドレスが同じであれば、対応する更新（’MODIP　〜　.')を抜いたスクリプトをsendする。Skipのメッセージは出す。
-すべてのHOSTNAME：の更新がスキップされることがある（LOGIN/LOGOUTするだけ）
+- 更新する前のIPv4アドレスと、更新するアドレスが同じであれば、対応する更新（’MODIP　〜　.')を抜いたスクリプトをsendする。Skipのメッセージは出す（INFO)。
+- すべてのHOSTNAME：の更新がスキップされるときには、”No a record has to be updated. Continue..”をINFOレベルで出力する。
 - 起動オプションで、デーモン化できるようにして、更新要求を繰り返す周期も起動オプションで設定できるようにする。
 
 ## 仕様
 
 ```
-usage: update-onamae.py [-h] [-f config_filename] [-i time]
+usage: update-onamae.py [-h] [-f config_filename] [-i time] [-l logfile level logfile level]
 
 update config file for onamae ddns service
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   -f config_filename, --filename config_filename
                         Set config filename
   -i time, --interval time
-                        Interval time(0(defalut):update only once, X:update
-                        every Xs, X[mMhH]: update every X[mMhH]).
+                        Interval time(0(defalut):update only once, X:update every Xs, X[mMhH]: update every X[mMhH]).
+  -l logfile level logfile level, --log logfile level logfile level
+                        logfile name and loglevel(DEBUG..CRITICAL)
 ```
 
 ## 使い方
@@ -35,7 +36,12 @@ options:
 ```
 % update-onamae -f ./onamae-env --interval 10m
 ```
+###　更新スクリプトファイルを指定して、１０分周期で更新、ログ・ファイル名とレベルをINFOに指定（デフォルトはERROR）
+```
+% update-onamae -f ./onamae-env --interval 10m -l test.log INFO
+```
 ### スクリプトファイル
+パスワードが入りますので、'chmod　600'等はしておいてください。
 
 ```
 LOGIN
