@@ -58,7 +58,6 @@ def get_a_record(host, domain):
         else:
             a_record = subprocess.Popen(
                 f'{dig} {host}.{domain} a +short'.split(), stdout=subprocess.PIPE)
-        # a_record = a_record.stdout.read().decode('utf-8').split()[0]
         a_record = a_record.stdout.read().decode('utf-8')
         return a_record.strip()
 
