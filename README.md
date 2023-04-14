@@ -36,7 +36,7 @@ optional arguments:
 ```
 % update-onamae -f ./onamae-env --interval 10m
 ```
-###　コンフィグファイルを指定して、１０分周期で更新、ログ・ファイル名とレベルをINFOに指定（デフォルトはERROR）
+###　コンフィグファイルを指定して、１０分周期で更新、ログ・ファイル名とレベルをINFOに指定（デフォルトはINFO）
 ```
 % update-onamae -f ./onamae-env --interval 10m -l test.log INFO
 ```
