@@ -42,7 +42,7 @@ def get_a_record(host, domain):
         print('Soryy, bye.')
         sys.exit(1)
     else:
-        if host == '@':
+        if host == '':
             a_record = subprocess.Popen(
                 f'{dig} {domain} a +short'.split(), stdout=subprocess.PIPE)
         else:
@@ -93,21 +93,24 @@ def convert_cmd(userid, password, domain, hostname, ipv4, global_ip):
     i = 0
     modify_cmd = ""
     for host in hostname:
+        if host == "@":
+            host = ""
         if ipv4[i] == 'GLOBAL-IP':
             ipv4[i] = global_ip
-        if ipv4[i] == get_a_record(host, domain):
+        ip = get_a_record(host, domain)
+        if ipv4[i] == ip:
             print(
                 f"SKIP:{host}.{domain}'s ip address({ipv4[i]}) won't be changed.")
             i += 1
             continue
-        modify_cmd += "MODIP\n"
-        if host == '@':
-            modify_cmd +=f"HOSTNAME:\n"
         else:
+            print(
+                f"MODIFY:{host}.{domain}'s ip address{ip} will be changed to {ipv4[i]}.")
+            modify_cmd += "MODIP\n"
             modify_cmd += f"HOSTNAME:{host}\n"
-        modify_cmd += f"DOMNAME:{domain}\n"
-        modify_cmd += f"IPV4:{ipv4[i]}\n.\n"
-        i += 1
+            modify_cmd += f"DOMNAME:{domain}\n"
+            modify_cmd += f"IPV4:{ipv4[i]}\n.\n"
+            i += 1
     return login_cmd, modify_cmd
 
 
@@ -116,7 +119,7 @@ def do_update(userid, password, domain, hostname, ipv4):
     login_cmd, modify_cmd = convert_cmd(
         userid, password, domain, hostname, ipv4, global_ip)
     cmd = login_cmd + modify_cmd + "LOGOUT\n.\n"
-    print( cmd )
+    #print( cmd )
     openssl = shutil.which('openssl')
     openssl += ' s_client -connect ddnsclient.onamae.com:65010 -quiet'
     p = subprocess.Popen(
@@ -131,9 +134,9 @@ def do_update(userid, password, domain, hostname, ipv4):
     if p.returncode:
         print( f"status code:{p.returncode}\n" )
         if stderr_data:
-            print(f"stderr msg:{tderr_data.decode()}")
+            print(f"stderr msg:{stderr_data.decode()}")
     if "003 DBERROR" in stdout_data.decode().strip():
-        print( stdout_data.decode().strip() )
+        print( "Failed to update.\n" )
     return
 
 
