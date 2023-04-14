@@ -162,7 +162,7 @@ def daemonize(userid, password, domain, hostname, ipv4, interval):
 if __name__ == '__main__':
     args = get_args()
     if os.path.isfile( args.filename[0] ) == False:
-        print( "config file {args.filename} doen't exist.")
+        print( f"config file {args.filename[0]} doen't exist.")
         sys.exit(1)
     userid, password, domain, hostname, ipv4 = read_config(
         args.filename[0])
