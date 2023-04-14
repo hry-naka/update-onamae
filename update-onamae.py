@@ -8,6 +8,7 @@ import subprocess
 import requests
 import argparse
 import re
+import logging
 
 
 def get_args():
@@ -23,6 +24,11 @@ def get_args():
                         nargs=1,
                         default=['0'],
                         help="Interval time(0(defalut):update only once, X:update every Xs, X[mMhH]: update every X[mMhH]).")
+    parser.add_argument('-l', '--log',
+                        metavar='logfile level',
+                        nargs=2,
+                        default=['./.onamae-update.log','ERROR'],
+                        help="logfile name and loglevel(DEBUG..CRITICAL)")
     return parser.parse_args()
 
 
@@ -48,8 +54,7 @@ def get_global_ip():
 def get_a_record(host, domain):
     dig = shutil.which('dig')
     if dig is None:
-        print('This tool need dig to be installed to executable path')
-        print('Soryy, bye.')
+        logging.critical( 'This tool need dig to be installed to executable path' )
         sys.exit(1)
     else:
         if host == '':
@@ -108,12 +113,12 @@ def convert_cmd(userid, password, domain, hostname, ipv4, global_ip):
             ipv4[i] = global_ip
         ip = get_a_record(host, domain)
         if ipv4[i] == ip:
-            print(
+            logging.info(
                 f"SKIP:{host}.{domain}'s ip address({ip}) won't be changed.")
             i += 1
             continue
         else:
-            print(
+            logging.info(
                 f"MODIFY:{host}.{domain}'s ip address({ip}) will be changed to {ipv4[i]}.")
             modify_cmd += "MODIP\n"
             modify_cmd += f"HOSTNAME:{host}\n"
@@ -127,8 +132,11 @@ def do_update(userid, password, domain, hostname, ipv4):
     global_ip = get_global_ip()  # global_ipを取得する
     login_cmd, modify_cmd = convert_cmd(
         userid, password, domain, hostname, ipv4, global_ip)
+    if modify_cmd == "":
+        logging.info( "No A-record has to be updated. Continue.." )
+        return
     cmd = login_cmd + modify_cmd + "LOGOUT\n.\n"
-    #print( cmd )
+    logging.debug( cmd )
     openssl = shutil.which('openssl')
     openssl += ' s_client -connect ddnsclient.onamae.com:65010 -quiet'
     p = subprocess.Popen(
@@ -141,11 +149,11 @@ def do_update(userid, password, domain, hostname, ipv4):
     stdout_data, stderr_data = p.communicate(input=cmd.encode())
     # エラーがあれば出力する
     if p.returncode:
-        print( f"status code:{p.returncode}\n" )
+        logging.error( f"openssl status code:{p.returncode}\n" )
         if stderr_data:
-            print(f"stderr msg:{stderr_data.decode()}")
+            logging.error(f"openssl stderr msg:{stderr_data.decode()}")
     if "003 DBERROR" in stdout_data.decode().strip():
-        print( "Failed to update.\n" )
+        logging.error( "Failed to update.\n" )
     return
 
 
@@ -158,9 +166,25 @@ def daemonize(userid, password, domain, hostname, ipv4, interval):
             do_update(userid, password, domain, hostname, ipv4)
             time.sleep(interval)
 
+def init_loging( conditions ):
+    lv = None
+    r = re.match( "^(DEBUG|INFO|WARN|ERROR|CRITICAL)$", conditions[1] )
+    if r:
+        logging.basicConfig(
+            filename=f"{conditions[0]}",
+            level=getattr(logging, conditions[1] ),
+            format="%(asctime)s [%(levelname)s] %(message)s",
+            datefmt="%m/%d/%Y %I:%M:%S %p"
+        )
+        return
+    else:
+        print("Unknown log level.")
+        sys.exit(1)
+    return
 
 if __name__ == '__main__':
     args = get_args()
+    init_loging( args.log )
     if os.path.isfile( args.filename[0] ) == False:
         print( f"config file {args.filename[0]} doen't exist.")
         sys.exit(1)
