@@ -22,7 +22,7 @@ def get_args():
                         metavar='time',
                         nargs=1,
                         default=['0'],
-                        help="Interval time(0(defalut):update only once, X:update every Xs, X[mh]: update every X[mh]).")
+                        help="Interval time(0(defalut):update only once, X:update every Xs, X[mMhH]: update every X[mMhH]).")
     return parser.parse_args()
 
 
