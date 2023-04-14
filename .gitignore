@@ -129,4 +129,6 @@ dmypy.json
 .pyre/
 script-sample.txt
 check.sh
+.onamae-env
 .gitignore
+
