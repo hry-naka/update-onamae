@@ -109,12 +109,12 @@ def convert_cmd(userid, password, domain, hostname, ipv4, global_ip):
         ip = get_a_record(host, domain)
         if ipv4[i] == ip:
             print(
-                f"SKIP:{host}.{domain}'s ip address({ipv4[i]}) won't be changed.")
+                f"SKIP:{host}.{domain}'s ip address({ip}) won't be changed.")
             i += 1
             continue
         else:
             print(
-                f"MODIFY:{host}.{domain}'s ip address{ip} will be changed to {ipv4[i]}.")
+                f"MODIFY:{host}.{domain}'s ip address({ip}) will be changed to {ipv4[i]}.")
             modify_cmd += "MODIP\n"
             modify_cmd += f"HOSTNAME:{host}\n"
             modify_cmd += f"DOMNAME:{domain}\n"
