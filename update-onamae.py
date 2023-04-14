@@ -5,8 +5,6 @@ import sys
 import time
 import shutil
 import subprocess
-import socket
-import ssl
 import requests
 import argparse
 
@@ -16,15 +14,13 @@ def get_args():
         description='update config file for onamae ddns service')
     parser.add_argument('-f', '--filename',
                         metavar='config_filename',
-                        type=str,
-                        nargs=1,
-                        default='./.onamae-env',
+                        nargs='*',
+                        default=['./.onamae-env'],
                         help='Set config filename')
     parser.add_argument('-i', '--interval',
-                        metavar='interval',
-                        type=str,
-                        nargs=1,
-                        default="0",
+                        metavar='time',
+                        nargs='*',
+                        default=['0'],
                         help="Interval time(0(defalut):update only once, X:update every Xs, X[mh]: update every X[mh]).")
     return parser.parse_args()
 
@@ -63,7 +59,7 @@ def read_config(filename):
     userid = password = domain = None
     with open(filename) as f:
         for l in f.readlines():
-            if len(l) == 0:
+            if len(l) == 0:  # 空白行は無視
                 continue
             k, v = l.rstrip().split('=')
             if k == 'USERID':
@@ -91,12 +87,11 @@ def read_config(filename):
 
 
 def convert_cmd(userid, password, domain, hostname, ipv4, global_ip):
-    login_cmd = 'LOGIN¥n'
-    login_cmd += f"USERID:{userid}¥n"
-    login_cmd += f"PASSWORD:{password}¥n."
+    login_cmd = "LOGIN\n"
+    login_cmd += f"USERID:{userid}\n"
+    login_cmd += f"PASSWORD:{password}\n.\n"
     i = 0
     modify_cmd = ""
-    print( f"G-IP: {global_ip}:{type(global_ip)}")
     for host in hostname:
         if ipv4[i] == 'GLOBAL-IP':
             ipv4[i] = global_ip
@@ -105,53 +100,40 @@ def convert_cmd(userid, password, domain, hostname, ipv4, global_ip):
                 f"SKIP:{host}.{domain}'s ip address({ipv4[i]}) won't be changed.")
             i += 1
             continue
-        modify_cmd += 'MODIP¥n'
+        modify_cmd += "MODIP\n"
         if host == '@':
-            modify_cmd += f"HOSTNAME:¥n"
+            modify_cmd +=f"HOSTNAME:\n"
         else:
-            modify_cmd += f"HOSTNAME:{host}¥n"
-        modify_cmd += f"DOMNAME:{domain}¥n"
-        modify_cmd += f"IPV4:{ipv4[i]}¥n."
+            modify_cmd += f"HOSTNAME:{host}\n"
+        modify_cmd += f"DOMNAME:{domain}\n"
+        modify_cmd += f"IPV4:{ipv4[i]}\n.\n"
         i += 1
     return login_cmd, modify_cmd
-
-
-def connect():
-    # ドメインのNSレコードを取得する
-    # NSレコードのfqdnにsocketを接続する
-    return
-
-
-def send_login(login_cmd):
-    # 　login_cmdを送信する
-    # 　エラーだったら念のためLogoutする
-    return
-
-
-def send_modify(modify_cmd):
-    # modify_cmdを送信する
-    # 　エラーの場合はlogoutする
-    return
-
-
-def send_logout():
-    cmd = 'LOGOUT¥n.'
-    # cmdをsendする
-    # 　エラー処理する
-    return
 
 
 def do_update(userid, password, domain, hostname, ipv4):
     global_ip = get_global_ip()  # global_ipを取得する
     login_cmd, modify_cmd = convert_cmd(
         userid, password, domain, hostname, ipv4, global_ip)
-    print(login_cmd)
-    print(modify_cmd)
-    sys.exit(1)
-    connect(get_ns_record(domain))  # domainのNSサーバにコネクト
-    send_login(login_cmd)
-    send_modify(modify_cmd)
-    send_logout()
+    cmd = login_cmd + modify_cmd + "LOGOUT\n.\n"
+    print( cmd )
+    openssl = shutil.which('openssl')
+    openssl += ' s_client -connect ddnsclient.onamae.com:65010 -quiet'
+    p = subprocess.Popen(
+        openssl.split(),
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    # 標準入力にテキストを書き込み、標準出力から暗号化されたテキストを読み込む
+    stdout_data, stderr_data = p.communicate(input=cmd.encode())
+    # エラーがあれば出力する
+    if p.returncode:
+        print( f"status code:{p.returncode}\n" )
+        if stderr_data:
+            print(f"stderr msg:{tderr_data.decode()}")
+    if "003 DBERROR" in stdout_data.decode().strip():
+        print( stdout_data.decode().strip() )
     return
 
 
@@ -170,10 +152,14 @@ def daemonize(userid, password, domain, hostname, ipv4, interval):
 
 if __name__ == '__main__':
     args = get_args()
+    # print( args.filename[0] )
+    # print( args.interval[0] )
+    # sys.exit(1)
 
+    # filenameを読み出す
     userid, password, domain, hostname, ipv4 = read_config(
-        args.filename[0])  # filenameを読み出す
-    if (int(args.interval) == 0):
+        args.filename[0])
+    if (int(args.interval[0]) == 0):
         do_update(userid, password, domain, hostname, ipv4)
     else:
         daemonize(userid, password, domain, hostname,
