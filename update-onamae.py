@@ -14,13 +14,13 @@ def get_args():
         description='update config file for onamae ddns service')
     parser.add_argument('-f', '--filename',
                         metavar='config_filename',
-                        nargs='*',
-                        default=['./.onamae-env'],
+                        nargs=1,
+                        default='./.onamae-env',
                         help='Set config filename')
     parser.add_argument('-i', '--interval',
                         metavar='time',
-                        nargs='*',
-                        default=['0'],
+                        nargs=1,
+                        default='0',
                         help="Interval time(0(defalut):update only once, X:update every Xs, X[mh]: update every X[mh]).")
     return parser.parse_args()
 
@@ -155,14 +155,12 @@ def daemonize(userid, password, domain, hostname, ipv4, interval):
 
 if __name__ == '__main__':
     args = get_args()
-    # print( args.filename[0] )
-    # print( args.interval[0] )
-    # sys.exit(1)
-
-    # filenameを読み出す
+    if os.path.isfile( args.filename ) == False:
+        print( "config file {args.filename} doen't exist.")
+        sys.exit(1)   # filenameを読み出す
     userid, password, domain, hostname, ipv4 = read_config(
-        args.filename[0])
-    if (int(args.interval[0]) == 0):
+        args.filename)
+    if (int(args.interval) == 0):
         do_update(userid, password, domain, hostname, ipv4)
     else:
         daemonize(userid, password, domain, hostname,
