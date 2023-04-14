@@ -4,10 +4,10 @@ update script for onamae ddns service
 ## 機能(実装仕様）
 お名前ドットコムのDNS　Aレコードを更新する。
 - "ddnsclient.onamae.com:65010", にopensslコマンドでConfigの内容をsendする。
-- このスクリプトのConfigファイルには、'IPV4:xx.yy.zz.ww'で更新するIPアドレスを指定できる。'IPV4:GLOBAL-IP'と書くと、'https://ifconfig.me'
+- このスクリプトのコンフィグファイルには、'IPV4:xx.yy.zz.ww'で更新するIPアドレスを指定できる。'IPV4:GLOBAL-IP'と書くと、'https://ifconfig.me'
 から取得したIPv4アドレスに置換して更新に使う。
 - 更新する前のIPv4アドレスと、更新するアドレスが同じであれば、対応する更新（’MODIP　〜　.')を抜いたスクリプトをsendする。Skipのメッセージは出す（INFO)。
-- すべてのHOSTNAME：の更新がスキップされるときには、”No a record has to be updated. Continue..”をINFOレベルで出力する。
+- すべてのHOSTNAME：の更新がスキップされるときには、”No A-record has to be updated. Continue..”をINFOレベルで出力する。この場合はopnesslの起動も行わない。
 - 起動オプションで、デーモン化できるようにして、更新要求を繰り返す周期も起動オプションで設定できるようにする。
 
 ## 仕様
@@ -32,15 +32,15 @@ optional arguments:
 ```
 % update-onamae
 ```
-###　更新スクリプトファイルを指定して、１０分周期で更新
+###　コンフィグファイルを指定して、１０分周期で更新
 ```
 % update-onamae -f ./onamae-env --interval 10m
 ```
-###　更新スクリプトファイルを指定して、１０分周期で更新、ログ・ファイル名とレベルをINFOに指定（デフォルトはERROR）
+###　コンフィグファイルを指定して、１０分周期で更新、ログ・ファイル名とレベルをINFOに指定（デフォルトはERROR）
 ```
 % update-onamae -f ./onamae-env --interval 10m -l test.log INFO
 ```
-### スクリプトファイル
+### コンフィグファイル
 パスワードが入りますので、'chmod　600'等はしておいてください。
 
 ```
