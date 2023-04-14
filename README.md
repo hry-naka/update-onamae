@@ -3,22 +3,27 @@ update script for onamae ddns service
 
 ## 機能(実装仕様）
 お名前ドットコムのDNS　Aレコードを更新する。
-- 更新を要求する先のDNSサーバは、指定されたドメインのNSレコードの一番最初のレコードにある'fqdn'を使う。
-- この'fqdn'にsslセッションをはって、使う人が準備したスクリプトをsendする（だけ）。
-- このスクリプトには、'IPV4:xx.yy.zz.ww'で更新するIPアドレスを指定できる。'IPV4:GLOBAL-IP'と書くと、'https://ifconfig.me'
+- "ddnsclient.onamae.com:65010", にsslコネクションをはって、使う人が準備したConfigの内容をsendする。
+- このスクリプトのConfigファイルには、'IPV4:xx.yy.zz.ww'で更新するIPアドレスを指定できる。'IPV4:GLOBAL-IP'と書くと、'https://ifconfig.me'
 から取得したIPv4アドレスに置換して更新に使う。
-- 更新する前のIPv4アドレスと、更新するアドレスが同じであれば、対応する更新（’MODIP　〜　.')を抜いたスクリプトをsendする。
+- 更新する前のIPv4アドレスと、更新するアドレスが同じであれば、対応する更新（’MODIP　〜　.')を抜いたスクリプトをsendする。Skipのメッセージは出す。
 すべてのHOSTNAME：の更新がスキップされることがある（LOGIN/LOGOUTするだけ）
 - 起動オプションで、デーモン化できるようにして、更新要求を繰り返す周期も起動オプションで設定できるようにする。
 
 ## 仕様
 
 ```
-% update-onamae [-f filename] [--daemon] [--interval time]
+usage: update-onamae.py [-h] [-f script_filename] [-i interval]
+
+update script for onamae ddns service
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f script_filename, --filename script_filename
+                        Set script filename
+  -i interval, --interval interval
+                        Interval time(0(defalut):update only once, X:update every Xs, X[mh]: update every X[mh]).
 ```
-- '-f filename' : 更新スクリプトのファイル名。省略すると'./.onamae-env'を使う
-- ’--daemon' : デーモン化する。省略するとデーモン化しないでexitする
-- ’--interval　time’　: 更新を要求する周期。省略すると３００ｓ（５分）。timeは、単位がない場合は秒で扱う。X'm'はX分、Y’ｈ’はY時間
 
 ## 使い方
 ### 一回限りの更新
@@ -27,7 +32,7 @@ update script for onamae ddns service
 ```
 ###　更新スクリプトファイルを指定して、１０分周期で更新
 ```
-% update-onamae -f ./onamae-env --daemon --interval 10m
+% update-onamae -f ./onamae-env --interval 10m
 ```
 ### スクリプトファイル
 
