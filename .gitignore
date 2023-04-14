@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+script-sample.txt
+check.sh
+.gitignore
