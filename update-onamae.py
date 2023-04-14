@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import requests
 import argparse
+import re
 
 
 def get_args():
@@ -26,8 +27,17 @@ def get_args():
 
 
 def convert_interval(interval):
-    value = int(interval)  # Not yet to be implemented
-    return (value)
+    r = re.match( "([0-9]*)[mM]$", interval )
+    if r:
+        return int(r.group(1)) * 60
+    r = re.match( "([0-9]*)[hH]$", interval )
+    if r:
+        return int(r.group(1)) * 60 * 60
+    r = re.match( "([0-9]*)$", interval )
+    if r:
+        return int(r.group(1))
+    print( "Invalid inteval time.")
+    sys.exit(1)
 
 
 def get_global_ip():
@@ -142,10 +152,7 @@ def do_update(userid, password, domain, hostname, ipv4):
 
 def daemonize(userid, password, domain, hostname, ipv4, interval):
     pid = os.fork()  # fork child process
-    if pid > 0:  # Parrent proocess
-        pid_file = open('/var/run/python_daemon.pid', 'w')
-        pid_file.write(str(pid)+"\n")
-        pid_file.close()
+    if pid > 0: 
         sys.exit()
     elif pid == 0:  # 子プロセスの場合
         while True:
@@ -155,16 +162,14 @@ def daemonize(userid, password, domain, hostname, ipv4, interval):
 
 if __name__ == '__main__':
     args = get_args()
-    if os.path.isfile( args.filename ) == False:
+    if os.path.isfile( args.filename[0] ) == False:
         print( "config file {args.filename} doen't exist.")
-        sys.exit(1)   # filenameを読み出す
+        sys.exit(1)
     userid, password, domain, hostname, ipv4 = read_config(
-        args.filename)
-    if (int(args.interval) == 0):
+        args.filename[0])
+    interval = convert_interval(args.interval[0])
+    if interval == 0:
         do_update(userid, password, domain, hostname, ipv4)
     else:
         daemonize(userid, password, domain, hostname,
-                  ipv4, convert_interval(args.interval))
-    # print( args.filename )
-    # print( args.interval )
-    # print( get_global_ip() )
+                  ipv4,interval )
