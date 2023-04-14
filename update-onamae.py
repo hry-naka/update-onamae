@@ -27,14 +27,15 @@ def get_args():
     parser.add_argument('-l', '--log',
                         metavar='logfile level',
                         nargs=2,
-                        default=['./.onamae-update.log','ERROR'],
+                        default=['./.onamae-update.log','INFO'],
                         help="logfile name and loglevel(DEBUG..CRITICAL)")
     return parser.parse_args()
 
 
 def convert_interval(interval):
+    logging.info( f"Interval time : {interval}")
     r = re.match( "([0-9]*)[mM]$", interval )
-    if r:
+    if r:       
         return int(r.group(1)) * 60
     r = re.match( "([0-9]*)[hH]$", interval )
     if r:
@@ -68,6 +69,7 @@ def get_a_record(host, domain):
 
 
 def read_config(filename):
+    logging.info( f"Config File : {filename}")
     hostname = []
     ipv4 = []
     userid = password = domain = None
@@ -77,16 +79,20 @@ def read_config(filename):
                 continue
             k, v = l.rstrip().split('=')
             if k == 'USERID':
+                logging.info( f"USERID:{v}")
                 userid = v
             elif k == 'PASSWORD':
                 password = v
             elif k == 'DOMNAME':
+                logging.info( f"DOMNAME:{v}")
                 domain = v
             elif k == 'HOSTNAME':
+                logging.info( f"HOSTNAME:{v}")
                 if len(v) == 0:
                     v = '@'
                 hostname.append(v)
             elif k == 'IPV4':
+                logging.info( f"IPV4:{v}")           
                 ipv4.append(v)
     if userid is None or password is None or domain is None:
         print("Wrong config file. userid,password,domain should be specified.¥n")
@@ -113,7 +119,7 @@ def convert_cmd(userid, password, domain, hostname, ipv4, global_ip):
             ipv4[i] = global_ip
         ip = get_a_record(host, domain)
         if ipv4[i] == ip:
-            logging.info(
+            logging.debug(
                 f"SKIP:{host}.{domain}'s ip address({ip}) won't be changed.")
             i += 1
             continue
@@ -153,7 +159,7 @@ def do_update(userid, password, domain, hostname, ipv4):
         if stderr_data:
             logging.error(f"openssl stderr msg:{stderr_data.decode()}")
     if "003 DBERROR" in stdout_data.decode().strip():
-        logging.error( "Failed to update.\n" )
+        logging.warning( "Failed to update." )
     return
 
 
@@ -180,7 +186,6 @@ def init_loging( conditions ):
     else:
         print("Unknown log level.")
         sys.exit(1)
-    return
 
 if __name__ == '__main__':
     args = get_args()
@@ -188,11 +193,14 @@ if __name__ == '__main__':
     if os.path.isfile( args.filename[0] ) == False:
         print( f"config file {args.filename[0]} doen't exist.")
         sys.exit(1)
+    logging.info( "[[[[update-namae stated.]]]]")
     userid, password, domain, hostname, ipv4 = read_config(
         args.filename[0])
     interval = convert_interval(args.interval[0])
     if interval == 0:
         do_update(userid, password, domain, hostname, ipv4)
+        print( f"Bye. See detail {args.log[0]},if you want." )
+        sys.exit(0)
     else:
         daemonize(userid, password, domain, hostname,
                   ipv4,interval )
