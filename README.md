@@ -13,17 +13,18 @@ update script for onamae ddns service
 ## 仕様
 
 ```
-usage: update-onamae.py [-h] [-f config_filename] [-i time] [-l logfile level logfile level]
+usage: update-onamae.py [-h] [-f config_filename] [-i time] [-l logfile level]
 
 update config file for onamae ddns service
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -f config_filename, --filename config_filename
                         Set config filename
   -i time, --interval time
-                        Interval time(0(defalut):update only once, X:update every Xs, X[mMhH]: update every X[mMhH]).
-  -l logfile level logfile level, --log logfile level logfile level
+                        Interval time(0(defalut):update only once, X:update
+                        every Xs, X[mMhH]: update every X[mMhH]).
+  -l logfile level, --log logfile level
                         logfile name and loglevel(DEBUG..CRITICAL)
 ```
 
