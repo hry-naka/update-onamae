@@ -206,5 +206,4 @@ if __name__ == '__main__':
         sys.exit(0)
     else:
         daemonize(userid, password, domain, hostname,
-                  ipv4, interval)
-                  ipv4,interval )
+                  ipv4, interval )
