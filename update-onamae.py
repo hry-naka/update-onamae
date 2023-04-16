@@ -25,7 +25,7 @@ def get_args():
                         default=['0'],
                         help="Interval time(0(defalut):update only once, X:update every Xs, X[mMhH]: update every X[mMhH]).")
     parser.add_argument('-l', '--log',
-                        metavar='logfile level',
+                        metavar=('logfile','level'),
                         nargs=2,
                         default=['./.onamae-update.log', 'INFO'],
                         help="logfile name and loglevel(DEBUG..CRITICAL)")
@@ -207,3 +207,4 @@ if __name__ == '__main__':
     else:
         daemonize(userid, password, domain, hostname,
                   ipv4, interval)
+                  ipv4,interval )
