@@ -116,9 +116,10 @@ def convert_cmd(userid, password, domain, hostname, ipv4, global_ip):
     for host in hostname:
         if host == "@":
             host = ""
+        ip = get_a_record(host, domain)
         if ipv4[i] == 'GLOBAL-IP':
             ipv4[i] = global_ip
-        ip = get_a_record(host, domain)
+        logging.debug( f"HOSTNAME = {host}\nIPV4(GlobalIP) = {ipv4[i]}\nA-RECORD = {ip}")
         if ipv4[i] == ip:
             logging.debug(
                 f"SKIP:{host}.{domain}'s ip address({ip}) won't be changed.")
@@ -132,11 +133,13 @@ def convert_cmd(userid, password, domain, hostname, ipv4, global_ip):
             modify_cmd += f"DOMNAME:{domain}\n"
             modify_cmd += f"IPV4:{ipv4[i]}\n.\n"
             i += 1
+    logging.debug( f"Login CMD:\n{login_cmd}\nmodify CMD:\n{modify_cmd}" )
     return login_cmd, modify_cmd
 
 
 def do_update(userid, password, domain, hostname, ipv4):
     global_ip = get_global_ip()  # global_ipを取得する
+    logging.debug( f"current global ip address : {global_ip}" )
     login_cmd, modify_cmd = convert_cmd(
         userid, password, domain, hostname, ipv4, global_ip)
     if modify_cmd == "":
