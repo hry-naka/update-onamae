@@ -52,20 +52,34 @@ def get_global_ip():
     return (requests.get(url).content.decode('utf-8'))
 
 
-def get_a_record(host, domain):
+def get_ns_record( domain ):
+    dig = shutil.which('dig')
+    if dig is None:
+        logging.critical(
+            'This tool need dig to be installed to executable path')
+        sys.exit(1)
+    ns = subprocess.Popen(f'{dig} {domain} NS +short'.split(), stdout=subprocess.PIPE)
+    ns = ns.stdout.read().decode('utf-8').split('\n')[0]
+    logging.debug( f"NS server : {ns}")      
+    return( ns )
+
+def get_a_record(host, domain, ns):
     dig = shutil.which('dig')
     if dig is None:
         logging.critical(
             'This tool need dig to be installed to executable path')
         sys.exit(1)
     else:
+        ns = subprocess.Popen(
+                f'{dig} {domain} NS +short'.split(), stdout=subprocess.PIPE)
+        ns = ns.stdout.read().decode('utf-8').split('\n')[0]
         if host == '':
-            a_record = subprocess.Popen(
-                f'{dig} {domain} a +short'.split(), stdout=subprocess.PIPE)
+            cmd = f'{dig} @{ns} {domain} a +short'           
         else:
-            a_record = subprocess.Popen(
-                f'{dig} {host}.{domain} a +short'.split(), stdout=subprocess.PIPE)
+            cmd = f'{dig} @{ns} {host}.{domain} a +short'
+        a_record = subprocess.Popen( cmd.split(), stdout=subprocess.PIPE)
         a_record = a_record.stdout.read().decode('utf-8')
+        logging.debug( f"Current {host}.{domain} A-RECORD = {a_record}" )
         return a_record.strip()
 
 
@@ -113,28 +127,23 @@ def convert_cmd(userid, password, domain, hostname, ipv4, global_ip):
     login_cmd += f"PASSWORD:{password}\n.\n"
     i = 0
     modify_cmd = ""
+    ns = get_ns_record( domain )
     for host in hostname:
         if host == "@":
             host = ""
-        ip = get_a_record(host, domain)
-        logging.debug( f"Current {host}.{domain} A-RECORD = {ip}")
+        a_rec = get_a_record(host, domain, ns )
         if ipv4[i] == 'GLOBAL-IP':
-            ipv4[i] = global_ip
-        logging.debug( f"HOSTNAME = {host}\nIPV4(GlobalIP) = {ipv4[i]}\nA-RECORD = {ip}")
-        if ipv4[i] == ip:
-            logging.debug(
-                f"SKIP:{host}.{domain}'s A-RECORD({ip}) won't be changed.")
-            i += 1
-            continue
+            if global_ip == a_rec:
+                logging.debug(
+                    f"SKIP:{host}.{domain}'s A-RECORD({a_rec}) won't be changed.")
+                i += 1
+                continue
+            else:
+                modify_cmd += f"MODIP\nHOSTNAME:{host}\nDOMNAME:{domain}\nIPV4:{global_ip}\n.\n"
+                i += 1
+                continue
         else:
-            logging.info(
-                f"MODIFY:{host}.{domain}'s A-RECORD({ip}) will be changed to {ipv4[i]}.")
-            modify_cmd += "MODIP\n"
-            modify_cmd += f"HOSTNAME:{host}\n"
-            modify_cmd += f"DOMNAME:{domain}\n"
-            modify_cmd += f"IPV4:{ipv4[i]}\n.\n"
-            i += 1
-    logging.debug( f"\nLogin CMD:\n{login_cmd}\nmodify CMD:\n{modify_cmd}" )
+            modify_cmd += f"MODIP\nHOSTNAME:{host}\nDOMNAME:{domain}\nIPV4:{ipv4[i]}\n.\n"
     return login_cmd, modify_cmd
 
 
