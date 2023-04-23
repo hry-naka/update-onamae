@@ -117,23 +117,24 @@ def convert_cmd(userid, password, domain, hostname, ipv4, global_ip):
         if host == "@":
             host = ""
         ip = get_a_record(host, domain)
+        logging.debug( f"Current {host}.{domain} A-RECORD = {ip}")
         if ipv4[i] == 'GLOBAL-IP':
             ipv4[i] = global_ip
         logging.debug( f"HOSTNAME = {host}\nIPV4(GlobalIP) = {ipv4[i]}\nA-RECORD = {ip}")
         if ipv4[i] == ip:
             logging.debug(
-                f"SKIP:{host}.{domain}'s ip address({ip}) won't be changed.")
+                f"SKIP:{host}.{domain}'s A-RECORD({ip}) won't be changed.")
             i += 1
             continue
         else:
             logging.info(
-                f"MODIFY:{host}.{domain}'s ip address({ip}) will be changed to {ipv4[i]}.")
+                f"MODIFY:{host}.{domain}'s A-RECORD({ip}) will be changed to {ipv4[i]}.")
             modify_cmd += "MODIP\n"
             modify_cmd += f"HOSTNAME:{host}\n"
             modify_cmd += f"DOMNAME:{domain}\n"
             modify_cmd += f"IPV4:{ipv4[i]}\n.\n"
             i += 1
-    logging.debug( f"Login CMD:\n{login_cmd}\nmodify CMD:\n{modify_cmd}" )
+    logging.debug( f"\nLogin CMD:\n{login_cmd}\nmodify CMD:\n{modify_cmd}" )
     return login_cmd, modify_cmd
 
 
