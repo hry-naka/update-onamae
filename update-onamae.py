@@ -9,6 +9,7 @@ import requests
 import argparse
 import re
 import logging
+import json
 
 
 def get_args():
@@ -48,8 +49,11 @@ def convert_interval(interval):
 
 
 def get_global_ip():
-    url = 'https://ifconfig.me'
-    return (requests.get(url).content.decode('utf-8'))
+    #url = 'https://ifconfig.io/all.json'
+    url = 'https://ipinfo.io'
+    res = json.loads(requests.get(url).content.decode('utf-8'))
+    return( res['ip'] )
+    #return (requests.get(url).content.decode('utf-8'))
 
 
 def get_ns_record( domain ):
